@@ -127,8 +127,6 @@ public class DashboardView {
 
         Button addIncomeButton = createBottomButton("Add Income");
         Button addExpenseButton = createBottomButton("Add Expense");
-        Button goalsButton = createBottomButton("Goals");
-        Button recurringButton = createBottomButton("Recurring");
         Button insightsButton = createBottomButton("Insights");
 
         addIncomeButton.setOnAction(e ->
@@ -143,7 +141,7 @@ public class DashboardView {
                 SceneManager.switchTo(new InsightsView().getScene(), "CLO - Insights")
         );
 
-        HBox bottomBar = new HBox(10, addIncomeButton, addExpenseButton, goalsButton, recurringButton, insightsButton);
+        HBox bottomBar = new HBox(10, addIncomeButton, addExpenseButton, insightsButton);
         bottomBar.setAlignment(Pos.CENTER);
         bottomBar.setPadding(new Insets(6, 20, 14, 20));
 
