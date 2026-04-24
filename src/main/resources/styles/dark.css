@@ -1,0 +1,336 @@
+/* Global background for dark mode scenes */
+.root-pane {
+    -fx-background-color: linear-gradient(to bottom right, #1e1b22, #2b2530);
+}
+
+/* Main app title */
+.app-title {
+    -fx-font-size: 40px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #b8a7ff;
+}
+
+/* Subtitle under the app title */
+.subtitle {
+    -fx-font-size: 16px;
+    -fx-text-fill: #b5adb9;
+}
+
+/* Main page titles */
+.section-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #f2edf7;
+}
+
+/* Error and status message text */
+.message-label {
+    -fx-text-fill: #ff8e98;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+/* Primary action buttons */
+.primary-button {
+    -fx-background-color: #7c67ff;
+    -fx-text-fill: white;
+    -fx-padding: 12 22;
+    -fx-background-radius: 14;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.primary-button:hover {
+    -fx-background-color: #6c57f5;
+    -fx-cursor: hand;
+}
+
+/* Secondary action buttons */
+.secondary-button {
+    -fx-background-color: #312a39;
+    -fx-text-fill: #f2edf7;
+    -fx-padding: 12 16;
+    -fx-background-radius: 14;
+    -fx-border-color: #4a4153;
+    -fx-border-radius: 14;
+    -fx-font-size: 14px;
+}
+
+.secondary-button:hover {
+    -fx-background-color: #3a3243;
+    -fx-cursor: hand;
+}
+
+/* Dashboard top navigation buttons */
+.top-button {
+    -fx-background-color: #312a39;
+    -fx-text-fill: #f2edf7;
+    -fx-padding: 10 18;
+    -fx-background-radius: 12;
+    -fx-border-color: #4a4153;
+    -fx-border-radius: 12;
+}
+
+.top-button:hover {
+    -fx-background-color: #3a3243;
+    -fx-cursor: hand;
+}
+
+/* Dashboard bottom action buttons */
+.bottom-button {
+    -fx-background-color: #7c67ff;
+    -fx-text-fill: white;
+    -fx-background-radius: 12;
+    -fx-padding: 8 16;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+.bottom-button:hover {
+    -fx-background-color: #6c57f5;
+    -fx-cursor: hand;
+}
+
+/* Main block around form input controls */
+.floating-field-box {
+    -fx-background-color: #2a2530;
+    -fx-background-radius: 14;
+    -fx-border-color: #4a4153;
+    -fx-border-radius: 14;
+    -fx-padding: 18 14 10 14;
+    -fx-pref-width: 300;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.25), 8, 0, 0, 2);
+}
+
+/* Focus state for input blocks */
+.floating-field-box:focused-within {
+    -fx-border-color: #8e7cff;
+}
+
+/* Small label above each input */
+.floating-label {
+    -fx-font-size: 13px;
+    -fx-text-fill: #beb6c8;
+    -fx-font-weight: bold;
+}
+
+/* Transparent text field used inside floating input blocks */
+.floating-input {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: #f2edf7;
+    -fx-padding: 0;
+    -fx-font-size: 14px;
+}
+
+/* Helper text under each input block */
+.helper-text {
+    -fx-font-size: 11px;
+    -fx-text-fill: #9c94a8;
+}
+
+/* Error border for invalid input fields */
+.input-error {
+    -fx-border-color: #ff8e98;
+    -fx-border-width: 2;
+}
+
+/* Date picker base styling */
+.date-picker {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-font-size: 14px;
+}
+
+/* Date picker text field */
+.date-picker .text-field {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: #f2edf7;
+    -fx-padding: 0;
+    -fx-font-size: 14px;
+}
+
+/* Combo box base styling */
+.combo-box {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-font-size: 14px;
+}
+
+/* Combo box dropdown text */
+.combo-box .list-cell {
+    -fx-font-size: 14px;
+    -fx-text-fill: #f2edf7;
+    -fx-background-color: #2a2530;
+}
+
+/* Dashboard background */
+.dashboard-root {
+    -fx-background-color: linear-gradient(to bottom right, #1c1921, #28232d);
+}
+
+/* Small CLO label on dashboard */
+.mini-app-title {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #a999ff;
+}
+
+/* Main dashboard greeting */
+.dashboard-title {
+    -fx-font-size: 30px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #f2edf7;
+}
+
+/* Dashboard subtitle */
+.dashboard-subtitle {
+    -fx-font-size: 15px;
+    -fx-text-fill: #b3aaba;
+}
+
+/* Main reusable card component */
+.info-card {
+    -fx-background-color: rgba(42, 37, 48, 0.96);
+    -fx-background-radius: 18;
+    -fx-border-color: #4a4153;
+    -fx-border-radius: 18;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 20, 0, 0, 6);
+}
+
+/* Right-side insight cards */
+.side-card {
+    -fx-background-color: rgba(42, 37, 48, 0.96);
+    -fx-background-radius: 18;
+    -fx-border-color: #4a4153;
+    -fx-border-radius: 18;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 20, 0, 0, 6);
+}
+
+/* Small title inside cards */
+.card-title {
+    -fx-text-fill: #b8afc0;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+/* Big value text inside summary cards */
+.card-value {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #f2edf7;
+}
+
+/* General body text inside cards */
+.side-card-value {
+    -fx-font-size: 16px;
+    -fx-text-fill: #ddd6e5;
+    -fx-wrap-text: true;
+}
+
+/* Main wallet panel */
+.wallet-wrapper {
+    -fx-background-color: linear-gradient(to bottom right, #2a2233, #3a3145);
+    -fx-background-radius: 30;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.35), 22, 0, 0, 8);
+}
+
+/* Wallet title */
+.wallet-main-title {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+/* Wallet subtitle */
+.wallet-main-subtitle {
+    -fx-font-size: 14px;
+    -fx-text-fill: #d1c8db;
+}
+
+/* Base wallet category card */
+.wallet-card {
+    -fx-background-radius: 18;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.18), 10, 0, 0, 3);
+}
+
+.wallet-card:hover {
+    -fx-cursor: hand;
+    -fx-translate-y: -2;
+}
+
+/* Wallet category title */
+.wallet-card-title {
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+/* Wallet category subtitle */
+.wallet-card-subtitle {
+    -fx-text-fill: rgba(255,255,255,0.88);
+    -fx-font-size: 12px;
+}
+
+/* Wallet amount text */
+.wallet-card-amount {
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+/* Wallet color for essentials */
+.wallet-red {
+    -fx-background-color: linear-gradient(to right, #a54f57, #8e434b);
+}
+
+/* Wallet color for education and work */
+.wallet-yellow {
+    -fx-background-color: linear-gradient(to right, #aa9144, #927a35);
+}
+
+/* Wallet color for savings and investments */
+.wallet-green {
+    -fx-background-color: linear-gradient(to right, #3d8a72, #33745f);
+}
+
+/* Wallet color for lifestyle */
+.wallet-orange {
+    -fx-background-color: linear-gradient(to right, #a36843, #8b5635);
+}
+
+/* Wallet color for health and emergencies */
+.wallet-blue {
+    -fx-background-color: linear-gradient(to right, #4e73a9, #405f8b);
+}
+
+/* Compact in-app confirmation card */
+.overlay-card {
+    -fx-background-color: rgba(42, 37, 48, 0.98);
+    -fx-background-radius: 22;
+    -fx-border-color: #4a4153;
+    -fx-border-radius: 22;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.28), 24, 0, 0, 8);
+    -fx-max-width: 460;
+    -fx-min-width: 460;
+}
+
+/* Dimmed background behind overlay cards */
+.overlay-backdrop {
+    -fx-background-color: rgba(10, 10, 10, 0.22);
+}
+
+/* Title inside overlay cards */
+.overlay-title {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #f2edf7;
+}
+
+/* Supporting text inside overlay cards */
+.overlay-text {
+    -fx-font-size: 14px;
+    -fx-text-fill: #c9c1d2;
+    -fx-wrap-text: true;
+}
