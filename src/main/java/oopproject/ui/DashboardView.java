@@ -8,6 +8,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.*;
 import oopproject.model.User;
 import oopproject.service.FinanceService;
+import oopproject.util.CurrencyManager;
 import oopproject.util.SceneManager;
 import oopproject.util.SessionManager;
 import oopproject.util.ThemeManager;
@@ -53,6 +54,13 @@ public class DashboardView {
         VBox titleBox = new VBox(6, appLabel, welcomeLabel, subLabel);
         titleBox.setAlignment(Pos.CENTER_LEFT);
 
+        Button currencyButton = new Button(CurrencyManager.getCurrencyLabel());
+        currencyButton.getStyleClass().add("top-button");
+        currencyButton.setOnAction(e -> {
+            CurrencyManager.toggleCurrency();
+            SceneManager.switchTo(new DashboardView().getScene(), "CLO - Dashboard");
+        });
+
         Button profileButton = new Button("Profile");
         profileButton.getStyleClass().add("top-button");
         profileButton.setOnAction(e ->
@@ -68,7 +76,7 @@ public class DashboardView {
         Button logoutButton = new Button("Logout");
         logoutButton.getStyleClass().add("top-button");
 
-        HBox topRight = new HBox(10, profileButton, settingsButton, logoutButton);
+        HBox topRight = new HBox(10, currencyButton, profileButton, settingsButton, logoutButton);
         topRight.setAlignment(Pos.CENTER_RIGHT);
 
         Region topSpacer = new Region();
@@ -263,7 +271,7 @@ public class DashboardView {
     }
 
     private String formatAmount(double amount) {
-        return String.format("$%.2f", amount);
+        return CurrencyManager.formatAmount(amount);
     }
 
     private String generateDashboardSubtitle(double income, double expenses) {
