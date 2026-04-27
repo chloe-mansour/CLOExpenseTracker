@@ -97,8 +97,8 @@
     -fx-background-radius: 14;
     -fx-border-color: #4a4153;
     -fx-border-radius: 14;
-    -fx-padding: 18 14 10 14;
-    -fx-pref-width: 300;
+    -fx-padding: 12 14 8 14;
+    -fx-pref-width: 270;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.25), 8, 0, 0, 2);
 }
 
@@ -120,14 +120,21 @@
     -fx-border-color: transparent;
     -fx-text-fill: #f2edf7;
     -fx-padding: 0;
-    -fx-font-size: 14px;
+    -fx-font-size: 13px;
 }
 
 /* Helper text under each input block */
 .helper-text {
-    -fx-font-size: 11px;
+    -fx-font-size: 10px;
     -fx-text-fill: #9c94a8;
 }
+
+/* Checkbox text used in settings */
+.settings-check {
+    -fx-text-fill: #e6e0eb;
+    -fx-font-size: 14px;
+}
+
 
 /* Error border for invalid input fields */
 .input-error {

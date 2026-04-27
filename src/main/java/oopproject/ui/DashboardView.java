@@ -321,6 +321,7 @@ public class DashboardView {
     }
 
     public Scene getScene() {
+
         return scene;
     }
 }

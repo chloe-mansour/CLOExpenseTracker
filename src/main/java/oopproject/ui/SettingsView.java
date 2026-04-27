@@ -28,9 +28,11 @@ public class SettingsView {
 
         CheckBox darkModeCheck = new CheckBox("Enable dark mode");
         darkModeCheck.setSelected(ThemeManager.isDarkMode());
+        darkModeCheck.getStyleClass().add("settings-check");
 
         CheckBox quotesPlaceholder = new CheckBox("Show motivational quotes");
         quotesPlaceholder.setSelected(true);
+        quotesPlaceholder.getStyleClass().add("settings-check");
 
         Button saveButton = new Button("Save Settings");
         saveButton.getStyleClass().add("primary-button");
@@ -98,6 +100,7 @@ public class SettingsView {
         scene.getStylesheets().add(getClass().getResource(ThemeManager.getThemeStylesheet()).toExternalForm());
     }
 
+    // Creates a reusable settings input field
     private VBox createField(String labelText, TextField field, String helperText) {
         Label label = new Label(labelText);
         label.getStyleClass().add("floating-label");
