@@ -481,3 +481,16 @@
 .chart-pie-label-line {
     -fx-stroke: #c9c1d2;
 }
+
+.date-picker {
+    -fx-background-color: transparent;
+}
+
+.date-picker .arrow-button {
+    -fx-background-color: #3a3448; /* darker tone matching your theme */
+    -fx-background-radius: 6;
+}
+
+.date-picker .arrow-button:hover {
+    -fx-background-color: #4a425c;
+}

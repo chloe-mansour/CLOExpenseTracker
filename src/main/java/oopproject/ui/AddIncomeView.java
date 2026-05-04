@@ -88,7 +88,7 @@ public class AddIncomeView {
             String note = noteField.getText().trim();
             LocalDate date = datePicker.getValue();
 
-            // Required field validation (no red borders, only message)
+            // Required field validation
             if (source.isEmpty() || transactionTitle.isEmpty() || amountText.isEmpty()) {
                 messageLabel.setText("Please fill in the required fields.");
                 return;
@@ -124,7 +124,7 @@ public class AddIncomeView {
                 SceneManager.switchTo(new DashboardView().getScene(), "CLO - Dashboard")
         );
 
-        // Main form layout (same alignment style as SignupView)
+        // Main form layout, same alignment style as SignupView and AddExpenseView
         VBox form = new VBox(
                 16,
                 title,
@@ -138,10 +138,11 @@ public class AddIncomeView {
                 messageLabel
         );
 
+        // Centers all components without stretching the buttons
         form.setAlignment(Pos.CENTER);
         form.setMaxWidth(420);
 
-        // Center everything on the page
+        // Centers the whole form on the page
         StackPane root = new StackPane(form);
         root.setAlignment(Pos.CENTER);
         root.setPadding(new Insets(40));
@@ -157,53 +158,62 @@ public class AddIncomeView {
         label.getStyleClass().add("floating-label");
 
         field.getStyleClass().add("floating-input");
+        field.setMinWidth(width);
         field.setPrefWidth(width);
         field.setMaxWidth(width);
 
         VBox fieldBox = new VBox(2, label, field);
         fieldBox.getStyleClass().add("floating-field-box");
         fieldBox.setAlignment(Pos.CENTER_LEFT);
+        fieldBox.setMinWidth(width);
         fieldBox.setPrefWidth(width);
         fieldBox.setMaxWidth(width);
 
         Label helper = new Label(helperText);
         helper.getStyleClass().add("helper-text");
         helper.setAlignment(Pos.CENTER_LEFT);
+        helper.setMinWidth(width);
         helper.setPrefWidth(width);
         helper.setMaxWidth(width);
 
-        // Center the whole block (this fixes left shift)
+        // Centers the whole input block, while the helper text stays left-aligned
         VBox wrapper = new VBox(4, fieldBox, helper);
         wrapper.setAlignment(Pos.CENTER);
+        wrapper.setMinWidth(width);
         wrapper.setPrefWidth(width);
         wrapper.setMaxWidth(width);
 
         return wrapper;
     }
 
-    // Creates the date picker block
+    // Creates the date picker block with helper text
     private VBox createDateField(String labelText, DatePicker picker, String helperText, double width) {
         Label label = new Label(labelText);
         label.getStyleClass().add("floating-label");
 
-        picker.setPrefWidth(width);
-        picker.setMaxWidth(width);
+        // Slightly smaller than the outer box so the calendar icon stays inside
+        picker.setMinWidth(width - 30);
+        picker.setPrefWidth(width - 30);
+        picker.setMaxWidth(width - 30);
 
         VBox fieldBox = new VBox(2, label, picker);
         fieldBox.getStyleClass().add("floating-field-box");
         fieldBox.setAlignment(Pos.CENTER_LEFT);
+        fieldBox.setMinWidth(width);
         fieldBox.setPrefWidth(width);
         fieldBox.setMaxWidth(width);
 
         Label helper = new Label(helperText);
         helper.getStyleClass().add("helper-text");
         helper.setAlignment(Pos.CENTER_LEFT);
+        helper.setMinWidth(width);
         helper.setPrefWidth(width);
         helper.setMaxWidth(width);
 
-        // Center block
+        // Centers the whole date block like the other inputs
         VBox wrapper = new VBox(4, fieldBox, helper);
         wrapper.setAlignment(Pos.CENTER);
+        wrapper.setMinWidth(width);
         wrapper.setPrefWidth(width);
         wrapper.setMaxWidth(width);
 

@@ -228,14 +228,15 @@ public class AddExpenseView {
         return container;
     }
 
-    // Creates the date picker input block
+    // Creates the date picker block with helper text
     private VBox createDateField(String labelText, DatePicker picker, String helperText, double width) {
         Label label = new Label(labelText);
         label.getStyleClass().add("floating-label");
 
-        picker.setMinWidth(width);
-        picker.setPrefWidth(width);
-        picker.setMaxWidth(width);
+        // Slightly smaller than the outer box so the calendar icon stays inside
+        picker.setMinWidth(width - 30);
+        picker.setPrefWidth(width - 30);
+        picker.setMaxWidth(width - 30);
 
         VBox fieldBox = new VBox(2, label, picker);
         fieldBox.getStyleClass().add("floating-field-box");
@@ -251,13 +252,14 @@ public class AddExpenseView {
         helper.setPrefWidth(width);
         helper.setMaxWidth(width);
 
-        VBox container = new VBox(4, fieldBox, helper);
-        container.setAlignment(Pos.CENTER);
-        container.setMinWidth(width);
-        container.setPrefWidth(width);
-        container.setMaxWidth(width);
+        // Centers the whole date block like the other inputs
+        VBox wrapper = new VBox(4, fieldBox, helper);
+        wrapper.setAlignment(Pos.CENTER);
+        wrapper.setMinWidth(width);
+        wrapper.setPrefWidth(width);
+        wrapper.setMaxWidth(width);
 
-        return container;
+        return wrapper;
     }
 
     public Scene getScene() {
