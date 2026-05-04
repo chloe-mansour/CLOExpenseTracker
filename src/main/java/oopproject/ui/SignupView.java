@@ -408,7 +408,7 @@ public class SignupView {
 
     // Checks if the email follows a normal email format
     private boolean isValidEmail(String email) {
-        return email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
+        return email.matches("^[A-Za-z0-9._%+-]{2,}@[A-Za-z0-9.-]+\\.[A-Za-z]{3,}$");
     }
 
     // Checks password strength for better account security

@@ -8,12 +8,14 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import oopproject.model.User;
 import oopproject.service.ProfileService;
 import oopproject.util.SceneManager;
 import oopproject.util.SessionManager;
 import oopproject.util.ThemeManager;
+
 import java.time.LocalDate;
 import java.time.Period;
 
@@ -29,7 +31,7 @@ public class ProfileView {
         Label title = new Label("My Profile");
         title.getStyleClass().add("section-title");
 
-        // Pre-fills fields with current user data
+        // Pre-fills editable fields with current user data
         TextField studyFieldField = new TextField();
         studyFieldField.setText(currentUser != null && currentUser.getStudyField() != null ? currentUser.getStudyField() : "");
 
@@ -41,12 +43,13 @@ public class ProfileView {
 
         CheckBox employedCheckBox = new CheckBox("Currently working");
         employedCheckBox.setSelected(currentUser != null && currentUser.isEmployed());
+        employedCheckBox.getStyleClass().add("settings-check");
 
         VBox studyFieldBox = createField("Study Field", studyFieldField);
         VBox dobBox = createDateField("Date of Birth", dateOfBirthPicker);
         VBox jobTitleBox = createField("Job Title", jobTitleField);
 
-        // Shows job title only if working is checked
+        // Shows job title only if the user is currently working
         jobTitleBox.setVisible(employedCheckBox.isSelected());
         jobTitleBox.setManaged(employedCheckBox.isSelected());
 
@@ -59,14 +62,20 @@ public class ProfileView {
             }
         });
 
-        Label fullNameLabel = new Label("Full Name: " + (currentUser != null ? currentUser.getFullName() : "Unknown"));
-        fullNameLabel.getStyleClass().add("side-card-value");
+        HBox nameRow = createInfoRow(
+                "Full Name:",
+                currentUser != null ? currentUser.getFullName() : "Unknown"
+        );
 
-        Label emailLabel = new Label("Email: " + (currentUser != null ? currentUser.getEmail() : "Unknown"));
-        emailLabel.getStyleClass().add("side-card-value");
+        HBox emailRow = createInfoRow(
+                "Email:",
+                currentUser != null ? currentUser.getEmail() : "Unknown"
+        );
 
-        Label ageLabel = new Label("Age: " + calculateAgeText(currentUser != null ? currentUser.getDateOfBirth() : null));
-        ageLabel.getStyleClass().add("side-card-value");
+        HBox ageRow = createInfoRow(
+                "Age:",
+                calculateAgeText(currentUser != null ? currentUser.getDateOfBirth() : null)
+        );
 
         Button saveButton = new Button("Save Changes");
         saveButton.getStyleClass().add("primary-button");
@@ -76,6 +85,7 @@ public class ProfileView {
 
         Label messageLabel = new Label();
         messageLabel.getStyleClass().add("message-label");
+        messageLabel.setWrapText(true);
 
         // Saves updated editable profile data
         saveButton.setOnAction(e -> {
@@ -108,7 +118,7 @@ public class ProfileView {
             );
 
             if (success) {
-                // Refreshes the session user after profile update
+                // Reloads the session user so the profile shows the latest data
                 User refreshedUser = profileService.getUserById(currentUser.getId());
                 SessionManager.setCurrentUser(refreshedUser);
                 SceneManager.switchTo(new ProfileView().getScene(), "CLO - Profile");
@@ -123,9 +133,9 @@ public class ProfileView {
 
         VBox profileCard = new VBox(
                 12,
-                fullNameLabel,
-                emailLabel,
-                ageLabel,
+                nameRow,
+                emailRow,
+                ageRow,
                 dobBox,
                 studyFieldBox,
                 employedCheckBox,
@@ -134,9 +144,11 @@ public class ProfileView {
                 backButton,
                 messageLabel
         );
+
         profileCard.getStyleClass().add("info-card");
         profileCard.setPadding(new Insets(24));
         profileCard.setMaxWidth(450);
+        profileCard.setAlignment(Pos.CENTER_LEFT);
 
         VBox root = new VBox(20, title, profileCard);
         root.setAlignment(Pos.CENTER);
@@ -145,6 +157,21 @@ public class ProfileView {
 
         scene = new Scene(root);
         scene.getStylesheets().add(getClass().getResource(ThemeManager.getThemeStylesheet()).toExternalForm());
+    }
+
+    // Creates a profile info row where only the title is bold
+    private HBox createInfoRow(String titleText, String valueText) {
+        Label title = new Label(titleText + " ");
+        title.getStyleClass().add("side-card-value");
+        title.setStyle("-fx-font-weight: bold;");
+
+        Label value = new Label(valueText);
+        value.getStyleClass().add("side-card-value");
+
+        HBox row = new HBox(4, title, value);
+        row.setAlignment(Pos.CENTER_LEFT);
+
+        return row;
     }
 
     // Creates a labeled text field block
@@ -165,6 +192,8 @@ public class ProfileView {
         Label label = new Label(labelText);
         label.getStyleClass().add("floating-label");
 
+        picker.getStyleClass().add("floating-input");
+
         VBox fieldBox = new VBox(2, label, picker);
         fieldBox.getStyleClass().add("floating-field-box");
 
@@ -176,6 +205,7 @@ public class ProfileView {
         if (dob == null) {
             return "Not available";
         }
+
         return String.valueOf(Period.between(dob, LocalDate.now()).getYears());
     }
 
