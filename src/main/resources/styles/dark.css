@@ -143,13 +143,6 @@
     -fx-font-size: 14px;
 }
 
-
-/* Error border for invalid input fields */
-.input-error {
-    -fx-border-color: #ff8e98;
-    -fx-border-width: 2;
-}
-
 /* Date picker base styling */
 .date-picker {
     -fx-background-color: transparent;
