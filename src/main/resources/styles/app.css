@@ -102,24 +102,34 @@
     -fx-effect: dropshadow(gaussian, rgba(80, 60, 40, 0.04), 8, 0, 0, 2);
 }
 
-/* Focus state for input blocks */
-.floating-field-box:focused-within {
-    -fx-border-color: #6d5dfc;
+/* Main block around form input controls */
+.floating-field-box {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-border-color: #e5ddea;
+    -fx-border-radius: 12;
+
+    -fx-padding: 10 12 6 12;
+
+    -fx-pref-width: 240;   /* ↓ reduced from 270 */
+    -fx-max-width: 240;
+
+    -fx-effect: dropshadow(gaussian, rgba(80, 60, 40, 0.04), 6, 0, 0, 2);
 }
 
-/* Small label above each input */
+/* Label inside input (Email, Password, etc.) */
 .floating-label {
-    -fx-font-size: 13px;
-    -fx-text-fill: #7b7280;
-    -fx-font-weight: bold;
+    -fx-font-size: 10px;
+    -fx-text-fill: #8c8495;
 }
 
-/* Transparent text field used inside floating input blocks */
+/* Text inside input */
 .floating-input {
     -fx-background-color: transparent;
     -fx-border-color: transparent;
+
+    -fx-font-size: 12.5px;   /* slightly smaller */
     -fx-padding: 0;
-    -fx-font-size: 13px;
 }
 
 /* Helper text under each input block */
@@ -335,4 +345,78 @@
     -fx-font-size: 14px;
     -fx-text-fill: #6f6877;
     -fx-wrap-text: true;
+}
+
+.root-pane {
+    -fx-alignment: center;
+}
+
+/* Compact exchange rate card in settings */
+.settings-rate-card {
+    -fx-background-color: rgba(255, 255, 255, 0.92);
+    -fx-background-radius: 18;
+    -fx-border-color: #e6dfeb;
+    -fx-border-radius: 18;
+    -fx-effect: dropshadow(gaussian, rgba(80, 60, 40, 0.08), 14, 0, 0, 4);
+}
+
+.settings-rate-value {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2f2a33;
+}
+
+/* Interactive wallet shell */
+.wallet-stack-pane {
+    -fx-background-color: transparent;
+}
+
+.wallet-interactive-card {
+    -fx-background-radius: 20;
+    -fx-effect: dropshadow(gaussian, rgba(25, 18, 35, 0.20), 18, 0, 0, 6);
+}
+
+.wallet-card-hover {
+    -fx-translate-y: -2;
+    -fx-cursor: hand;
+}
+
+.wallet-card-open {
+    -fx-effect: dropshadow(gaussian, rgba(25, 18, 35, 0.34), 24, 0, 0, 10);
+}
+
+.wallet-chevron {
+    -fx-text-fill: white;
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+}
+
+.wallet-expanded-subtitle {
+    -fx-text-fill: rgba(255, 255, 255, 0.92);
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+.wallet-expanded-text {
+    -fx-text-fill: rgba(255, 255, 255, 0.86);
+    -fx-font-size: 13px;
+}
+
+.wallet-details-button {
+    -fx-background-color: rgba(255, 255, 255, 0.92);
+    -fx-text-fill: #3b3144;
+    -fx-background-radius: 12;
+    -fx-padding: 9 16;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.wallet-details-button:hover {
+    -fx-background-color: white;
+    -fx-cursor: hand;
+}
+
+/* Checkbox styling */
+.check-box {
+    -fx-text-fill: #2f2a33;
 }

@@ -5,10 +5,14 @@ import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.effect.ColorAdjust;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.Line;
+import javafx.scene.text.TextAlignment;
 import oopproject.model.User;
 import oopproject.service.AuthService;
 import oopproject.util.SceneManager;
@@ -17,7 +21,7 @@ import oopproject.util.ThemeManager;
 
 import java.time.LocalDate;
 
-// Signup screen with validation, date picker, and password visibility toggle
+// Signup screen with validation, optional profile info, and password visibility toggle
 public class SignupView {
 
     private final Scene scene;
@@ -27,14 +31,13 @@ public class SignupView {
         Label title = new Label("Create Your Account");
         title.getStyleClass().add("section-title");
 
-        // User input fields
         TextField fullNameField = new TextField();
         TextField emailField = new TextField();
 
         PasswordField passwordField = new PasswordField();
         TextField visiblePasswordField = new TextField();
 
-        // Keeps hidden and visible password fields synchronized
+        // Both password fields share the same text
         visiblePasswordField.textProperty().bindBidirectional(passwordField.textProperty());
         visiblePasswordField.setVisible(false);
         visiblePasswordField.setManaged(false);
@@ -43,25 +46,26 @@ public class SignupView {
         TextField jobTitleField = new TextField();
 
         DatePicker datePicker = new DatePicker();
-        datePicker.setPromptText("Select your date of birth");
         datePicker.getStyleClass().add("floating-input");
 
-        // Reusable form sections
         VBox fullNameBox = createFloatingField("Full Name", fullNameField, "Enter your full name");
         VBox emailBox = createFloatingField("Email", emailField, "Use a valid email");
+
         VBox passwordBox = createPasswordField(
                 "Password",
                 passwordField,
                 visiblePasswordField,
-                "8+ chars, upper, lower, number, special"
+                "Use 8+ characters with uppercase, lowercase, number, and special symbol"
         );
+
         VBox dobBox = createDateField("Date of Birth", datePicker, "Optional");
         VBox studyBox = createFloatingField("Study Field", studyFieldField, "Optional");
         VBox jobBox = createFloatingField("Job Title", jobTitleField, "Required if working");
 
         CheckBox workingCheck = new CheckBox("Currently working");
+        workingCheck.getStyleClass().add("settings-check");
 
-        // Job title is only visible when the user is working
+        // Job title only appears if the user is currently working
         jobBox.setVisible(false);
         jobBox.setManaged(false);
 
@@ -77,14 +81,30 @@ public class SignupView {
         Button createBtn = new Button("Create Account");
         createBtn.getStyleClass().add("primary-button");
 
-        // Keyboard navigation between fields using Enter
+        Button backBtn = new Button("Back to Login");
+        backBtn.getStyleClass().add("secondary-button");
+
+        Label message = new Label();
+        message.getStyleClass().add("message-label");
+        message.setWrapText(true);
+        message.setMaxWidth(360);
+        message.setAlignment(Pos.CENTER);
+        message.setTextAlignment(TextAlignment.CENTER);
+        message.setVisible(false);
+        message.setManaged(false);
+
+        // The warning message only takes space when there is text
+        message.textProperty().addListener((obs, oldText, newText) -> {
+            boolean hasMessage = newText != null && !newText.isBlank();
+            message.setVisible(hasMessage);
+            message.setManaged(hasMessage);
+        });
+
+        // Keyboard navigation between fields
         fullNameField.setOnAction(e -> emailField.requestFocus());
-
         emailField.setOnAction(e -> passwordField.requestFocus());
-
         passwordField.setOnAction(e -> datePicker.requestFocus());
         visiblePasswordField.setOnAction(e -> datePicker.requestFocus());
-
         datePicker.setOnAction(e -> studyFieldField.requestFocus());
 
         studyFieldField.setOnAction(e -> {
@@ -97,19 +117,17 @@ public class SignupView {
 
         jobTitleField.setOnAction(e -> createBtn.fire());
 
-        Button backBtn = new Button("Back to Login");
-        backBtn.getStyleClass().add("secondary-button");
-
-        // Validation message shown near the main required fields
-        Label message = new Label();
-        message.getStyleClass().add("message-label");
-        message.setWrapText(true);
-        message.setMaxWidth(430);
-        message.setMinHeight(24);
+        // Clear warning message when the user edits the form
+        fullNameField.textProperty().addListener((obs, oldVal, newVal) -> message.setText(""));
+        emailField.textProperty().addListener((obs, oldVal, newVal) -> message.setText(""));
+        passwordField.textProperty().addListener((obs, oldVal, newVal) -> message.setText(""));
+        visiblePasswordField.textProperty().addListener((obs, oldVal, newVal) -> message.setText(""));
+        jobTitleField.textProperty().addListener((obs, oldVal, newVal) -> message.setText(""));
 
         createBtn.setOnAction(e -> {
             String fullName = fullNameField.getText().trim();
             String email = emailField.getText().trim();
+
             String password = passwordField.isVisible()
                     ? passwordField.getText().trim()
                     : visiblePasswordField.getText().trim();
@@ -124,31 +142,31 @@ public class SignupView {
                 return;
             }
 
-            // Email format validation
+            if (!isValidFullName(fullName)) {
+                message.setText("Full name must contain at least 2 letters.");
+                return;
+            }
+
             if (!isValidEmail(email)) {
-                message.setText("Invalid email format. Example: user@gmail.com");
+                message.setText("Please enter the correct email format, such as name@gmail.com or name@outlook.com.");
                 return;
             }
 
-            // Password strength validation
             if (!isStrongPassword(password)) {
-                message.setText("Password must include upper, lower, number, and special character.");
+                message.setText("Password must include uppercase, lowercase, number, and special character.");
                 return;
             }
 
-            // Date validation
             if (dob != null && dob.isAfter(LocalDate.now())) {
                 message.setText("Date of birth cannot be in the future.");
                 return;
             }
 
-            // Conditional job title validation
             if (working && job.isEmpty()) {
-                message.setText("Job title is required if you are working.");
+                message.setText("Job title is required if you are currently working.");
                 return;
             }
 
-            // Prevents duplicate accounts
             if (authService.emailExists(email)) {
                 message.setText("Email already used.");
                 return;
@@ -181,7 +199,7 @@ public class SignupView {
                 SceneManager.switchTo(new LoginView().getScene(), "CLO - Login")
         );
 
-        VBox root = new VBox(
+        VBox form = new VBox(
                 12,
                 title,
                 fullNameBox,
@@ -196,16 +214,47 @@ public class SignupView {
                 backBtn
         );
 
-        root.setAlignment(Pos.CENTER);
-        root.setPadding(new Insets(28));
+        form.setAlignment(Pos.CENTER);
+        form.setMaxWidth(420);
+
+        // Decorative background lines
+        Pane background = new Pane();
+        background.setMouseTransparent(true);
+
+        Line topLine = new Line();
+        Line bottomLine = new Line();
+
+        topLine.setStrokeWidth(1);
+        bottomLine.setStrokeWidth(1);
+
+        topLine.setStyle("-fx-stroke: #6d5dfc;");
+        bottomLine.setStyle("-fx-stroke: #6d5dfc;");
+
+        topLine.startXProperty().bind(background.widthProperty().multiply(0.05));
+        topLine.endXProperty().bind(background.widthProperty().multiply(0.75));
+        topLine.setStartY(30);
+        topLine.setEndY(30);
+
+        bottomLine.startXProperty().bind(background.widthProperty().multiply(0.25));
+        bottomLine.endXProperty().bind(background.widthProperty().multiply(0.95));
+        bottomLine.startYProperty().bind(background.heightProperty().subtract(20));
+        bottomLine.endYProperty().bind(background.heightProperty().subtract(20));
+
+        background.getChildren().addAll(topLine, bottomLine);
+
+        StackPane root = new StackPane(background, form);
         root.getStyleClass().add("root-pane");
+        root.setAlignment(Pos.CENTER);
+        root.setPadding(new Insets(30));
 
         scene = new Scene(root);
         scene.getStylesheets().add(getClass().getResource(ThemeManager.getThemeStylesheet()).toExternalForm());
     }
 
-    // Creates a reusable floating text field block
+    // Creates a normal input block with helper text
     private VBox createFloatingField(String labelText, TextField field, String helper) {
+        double inputWidth = 360;
+
         Label label = new Label(labelText);
         label.getStyleClass().add("floating-label");
 
@@ -213,34 +262,77 @@ public class SignupView {
 
         VBox box = new VBox(2, label, field);
         box.getStyleClass().add("floating-field-box");
+        box.setMinWidth(inputWidth);
+        box.setPrefWidth(inputWidth);
+        box.setMaxWidth(inputWidth);
 
         Label help = new Label(helper);
         help.getStyleClass().add("helper-text");
+        help.setMinWidth(inputWidth);
+        help.setPrefWidth(inputWidth);
+        help.setMaxWidth(inputWidth);
+        help.setAlignment(Pos.CENTER_LEFT);
 
-        return new VBox(4, box, help);
+        VBox container = new VBox(4, box, help);
+        container.setAlignment(Pos.CENTER);
+        container.setMinWidth(inputWidth);
+        container.setPrefWidth(inputWidth);
+        container.setMaxWidth(inputWidth);
+
+        return container;
     }
 
-    // Creates a reusable date picker block
+    // Creates a date picker input block with helper text
     private VBox createDateField(String labelText, DatePicker picker, String helper) {
+        double inputWidth = 360;
+
         Label label = new Label(labelText);
         label.getStyleClass().add("floating-label");
 
+        picker.getStyleClass().add("floating-input");
+        picker.setMinWidth(inputWidth - 30);
+        picker.setPrefWidth(inputWidth - 30);
+        picker.setMaxWidth(inputWidth - 30);
+
         VBox box = new VBox(2, label, picker);
         box.getStyleClass().add("floating-field-box");
+        box.setMinWidth(inputWidth);
+        box.setPrefWidth(inputWidth);
+        box.setMaxWidth(inputWidth);
 
         Label help = new Label(helper);
         help.getStyleClass().add("helper-text");
+        help.setMinWidth(inputWidth);
+        help.setPrefWidth(inputWidth);
+        help.setMaxWidth(inputWidth);
+        help.setAlignment(Pos.CENTER_LEFT);
 
-        return new VBox(4, box, help);
+        VBox container = new VBox(4, box, help);
+        container.setAlignment(Pos.CENTER);
+        container.setMinWidth(inputWidth);
+        container.setPrefWidth(inputWidth);
+        container.setMaxWidth(inputWidth);
+
+        return container;
     }
 
-    // Creates a password field with icon-based visibility control
-    private VBox createPasswordField(String labelText, PasswordField hidden, TextField visible, String helper) {
+    // Creates the password field with an eye icon to show or hide the password
+    private VBox createPasswordField(String labelText, PasswordField hidden, TextField visible, String helperText) {
+        double inputWidth = 360;
+
         Label label = new Label(labelText);
         label.getStyleClass().add("floating-label");
 
         hidden.getStyleClass().add("floating-input");
         visible.getStyleClass().add("floating-input");
+
+        hidden.setMinWidth(inputWidth);
+        hidden.setPrefWidth(inputWidth);
+        hidden.setMaxWidth(inputWidth);
+
+        visible.setMinWidth(inputWidth);
+        visible.setPrefWidth(inputWidth);
+        visible.setMaxWidth(inputWidth);
 
         Image eyeOpen = new Image(getClass().getResourceAsStream("/icons/eye.png"));
         Image eyeClosed = new Image(getClass().getResourceAsStream("/icons/eye-off.png"));
@@ -249,12 +341,28 @@ public class SignupView {
         icon.setFitWidth(18);
         icon.setFitHeight(18);
 
+        // Makes the black eye icon visible in dark mode
+        if (ThemeManager.getThemeStylesheet().contains("dark")) {
+            ColorAdjust whiteIcon = new ColorAdjust();
+            whiteIcon.setBrightness(1.0);
+            icon.setEffect(whiteIcon);
+        }
+
         Button toggle = new Button();
         toggle.setGraphic(icon);
         toggle.setStyle("-fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 0;");
         toggle.setCursor(Cursor.HAND);
         toggle.setFocusTraversable(false);
-        toggle.setPrefWidth(35);
+
+        StackPane inputStack = new StackPane(hidden, visible, toggle);
+        inputStack.setMinWidth(inputWidth);
+        inputStack.setPrefWidth(inputWidth);
+        inputStack.setMaxWidth(inputWidth);
+
+        StackPane.setAlignment(toggle, Pos.CENTER_RIGHT);
+        StackPane.setMargin(toggle, new Insets(0, 14, 0, 0));
+        toggle.setTranslateX(-13);
+        toggle.setTranslateY(-10);
 
         toggle.setOnAction(e -> {
             if (hidden.isVisible()) {
@@ -276,26 +384,41 @@ public class SignupView {
             }
         });
 
-        VBox fieldStack = new VBox(2, label, hidden, visible);
+        VBox fieldBox = new VBox(2, label, inputStack);
+        fieldBox.getStyleClass().add("floating-field-box");
+        fieldBox.setMinWidth(inputWidth);
+        fieldBox.setPrefWidth(inputWidth);
+        fieldBox.setMaxWidth(inputWidth);
 
-        HBox wrapper = new HBox(10, fieldStack, toggle);
-        wrapper.setAlignment(Pos.CENTER_LEFT);
-
-        VBox box = new VBox(2, wrapper);
-        box.getStyleClass().add("floating-field-box");
-
-        Label help = new Label(helper);
+        Label help = new Label(helperText);
         help.getStyleClass().add("helper-text");
+        help.setMinWidth(inputWidth);
+        help.setPrefWidth(inputWidth);
+        help.setMaxWidth(inputWidth);
+        help.setAlignment(Pos.CENTER_LEFT);
 
-        return new VBox(4, box, help);
+        VBox container = new VBox(4, fieldBox, help);
+        container.setAlignment(Pos.CENTER);
+        container.setMinWidth(inputWidth);
+        container.setPrefWidth(inputWidth);
+        container.setMaxWidth(inputWidth);
+
+        return container;
     }
 
+    // Checks if the email follows a normal email format
     private boolean isValidEmail(String email) {
         return email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
     }
 
+    // Checks password strength for better account security
     private boolean isStrongPassword(String password) {
         return password.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&]).{8,}$");
+    }
+
+    // Makes sure the name has at least two letters and only normal name characters
+    private boolean isValidFullName(String fullName) {
+        return fullName.matches("^(?=.*[A-Za-z])[A-Za-z\\s]{2,}$");
     }
 
     public Scene getScene() {

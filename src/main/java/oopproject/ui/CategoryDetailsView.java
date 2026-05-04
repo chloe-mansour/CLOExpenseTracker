@@ -5,10 +5,15 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.layout.*;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import oopproject.model.Expense;
 import oopproject.model.User;
 import oopproject.service.FinanceService;
+import oopproject.util.CurrencyManager;
 import oopproject.util.SceneManager;
 import oopproject.util.SessionManager;
 import oopproject.util.ThemeManager;
@@ -31,10 +36,10 @@ public class CategoryDetailsView {
         Label title = new Label(categoryName);
         title.getStyleClass().add("section-title");
 
-        Label subtitle = new Label("Review and manage your saved expenses in this wallet section.");
+        Label subtitle = new Label("Click any expense to view its details, then edit or delete it.");
         subtitle.getStyleClass().add("dashboard-subtitle");
 
-        VBox totalCard = createTotalCard(categoryTotal, expenses.size());
+        VBox totalCard = createTotalCard(categoryTotal, expenses);
 
         VBox transactionsBox = new VBox(12);
         transactionsBox.setAlignment(Pos.TOP_CENTER);
@@ -76,17 +81,30 @@ public class CategoryDetailsView {
         scene.getStylesheets().add(getClass().getResource(ThemeManager.getThemeStylesheet()).toExternalForm());
     }
 
-    private VBox createTotalCard(double total, int transactionCount) {
-        Label totalTitle = new Label("Category Total");
+    private VBox createTotalCard(double total, List<Expense> expenses) {
+        Label totalTitle = new Label("Category Summary");
         totalTitle.getStyleClass().add("card-title");
 
-        Label totalValue = new Label(formatAmount(total));
+        Label totalValue = new Label(CurrencyManager.formatAmount(total));
         totalValue.getStyleClass().add("card-value");
 
-        Label countLabel = new Label(transactionCount + " transaction(s)");
+        int count = expenses.size();
+        double average = count == 0 ? 0 : total / count;
+        double highest = expenses.stream().mapToDouble(Expense::getAmount).max().orElse(0);
+
+        Label countLabel = new Label(count + " transaction(s)");
         countLabel.getStyleClass().add("side-card-value");
 
-        VBox box = new VBox(8, totalTitle, totalValue, countLabel);
+        Label averageLabel = new Label("Average: " + CurrencyManager.formatAmount(average));
+        averageLabel.getStyleClass().add("side-card-value");
+
+        Label highestLabel = new Label("Highest: " + CurrencyManager.formatAmount(highest));
+        highestLabel.getStyleClass().add("side-card-value");
+
+        HBox stats = new HBox(18, countLabel, averageLabel, highestLabel);
+        stats.setAlignment(Pos.CENTER_LEFT);
+
+        VBox box = new VBox(8, totalTitle, totalValue, stats);
         box.getStyleClass().add("info-card");
         box.setPadding(new Insets(20));
         box.setMaxWidth(760);
@@ -115,49 +133,102 @@ public class CategoryDetailsView {
         Label title = new Label(safeText(expense.getTitle()));
         title.getStyleClass().add("card-title");
 
-        Label amount = new Label(formatAmount(expense.getAmount()));
+        Label amount = new Label(CurrencyManager.formatAmount(expense.getAmount()));
         amount.getStyleClass().add("card-value");
 
-        Label date = new Label("Date: " + (expense.getDate() != null ? expense.getDate().toString() : "Not provided"));
+        Label date = new Label(expense.getDate() != null ? expense.getDate().toString() : "No date");
         date.getStyleClass().add("side-card-value");
 
-        Label note = new Label("Note: " + safeText(expense.getNote()));
-        note.getStyleClass().add("side-card-value");
-        note.setWrapText(true);
+        Label hint = new Label("Click to view details");
+        hint.getStyleClass().add("helper-text");
 
-        VBox leftInfo = new VBox(6, title, date, note);
-
-        Button editButton = new Button("Edit");
-        editButton.getStyleClass().add("secondary-button");
-        editButton.setOnAction(e ->
-                SceneManager.switchTo(new EditExpenseView(expense).getScene(), "CLO - Edit Expense")
-        );
-
-        Button deleteButton = new Button("Delete");
-        deleteButton.getStyleClass().add("secondary-button");
-
-        deleteButton.setOnAction(e -> {
-            VBox confirmationCard = createDeleteConfirmationCard(expense, categoryName, root, content);
-            root.getChildren().add(confirmationCard);
-            StackPane.setAlignment(confirmationCard, Pos.CENTER);
-            content.setDisable(true);
-        });
-
-        HBox actions = new HBox(8, editButton, deleteButton);
-        actions.setAlignment(Pos.CENTER_RIGHT);
+        VBox leftInfo = new VBox(5, title, date, hint);
+        leftInfo.setAlignment(Pos.CENTER_LEFT);
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        HBox topRow = new HBox(16, leftInfo, spacer, amount, actions);
-        topRow.setAlignment(Pos.CENTER_LEFT);
+        HBox row = new HBox(16, leftInfo, spacer, amount);
+        row.setAlignment(Pos.CENTER_LEFT);
 
-        VBox card = new VBox(topRow);
+        VBox card = new VBox(row);
         card.getStyleClass().add("info-card");
         card.setPadding(new Insets(18));
         card.setMaxWidth(760);
 
+        // The row opens a clean popup instead of showing edit/delete directly
+        card.setOnMouseClicked(e -> showExpenseDetails(expense, categoryName, root, content));
+
         return card;
+    }
+
+    private void showExpenseDetails(Expense expense, String categoryName, StackPane root, VBox content) {
+        VBox detailsCard = createExpenseDetailsCard(expense, categoryName, root, content);
+
+        root.getChildren().add(detailsCard);
+        StackPane.setAlignment(detailsCard, Pos.CENTER);
+
+        // Disables the background so the user focuses on the popup
+        content.setDisable(true);
+    }
+
+    private VBox createExpenseDetailsCard(Expense expense, String categoryName, StackPane root, VBox content) {
+        Label title = new Label(safeText(expense.getTitle()));
+        title.getStyleClass().add("overlay-title");
+
+        Label amount = new Label(CurrencyManager.formatAmount(expense.getAmount()));
+        amount.getStyleClass().add("card-value");
+
+        Label category = createDetailLine("Category", safeText(expense.getCategory()));
+        Label date = createDetailLine("Date", expense.getDate() != null ? expense.getDate().toString() : "Not provided");
+        Label note = createDetailLine("Note", safeText(expense.getNote()));
+        note.setWrapText(true);
+
+        Button closeButton = new Button("Close");
+        closeButton.getStyleClass().add("secondary-button");
+
+        Button editButton = new Button("Edit");
+        editButton.getStyleClass().add("primary-button");
+
+        Button deleteButton = new Button("Delete");
+        deleteButton.getStyleClass().add("secondary-button");
+
+        HBox actions = new HBox(12, closeButton, editButton, deleteButton);
+        actions.setAlignment(Pos.CENTER);
+
+        VBox card = new VBox(14, title, amount, category, date, note, actions);
+        card.setAlignment(Pos.CENTER);
+        card.setPadding(new Insets(24));
+        card.getStyleClass().add("overlay-card");
+        card.setPrefWidth(380);
+        card.setMaxWidth(380);
+        card.setMinHeight(Region.USE_PREF_SIZE);
+        card.setMaxHeight(Region.USE_PREF_SIZE);
+
+        closeButton.setOnAction(e -> {
+            root.getChildren().remove(card);
+            content.setDisable(false);
+        });
+
+        editButton.setOnAction(e ->
+                SceneManager.switchTo(new EditExpenseView(expense).getScene(), "CLO - Edit Expense")
+        );
+
+        deleteButton.setOnAction(e -> {
+            root.getChildren().remove(card);
+
+            VBox confirmationCard = createDeleteConfirmationCard(expense, categoryName, root, content);
+            root.getChildren().add(confirmationCard);
+            StackPane.setAlignment(confirmationCard, Pos.CENTER);
+        });
+
+        return card;
+    }
+
+    private Label createDetailLine(String label, String value) {
+        Label line = new Label(label + ": " + value);
+        line.getStyleClass().add("overlay-text");
+        return line;
     }
 
     private VBox createDeleteConfirmationCard(Expense expense, String categoryName, StackPane root, VBox content) {
@@ -179,9 +250,12 @@ public class CategoryDetailsView {
 
         VBox card = new VBox(14, title, text, actions);
         card.setAlignment(Pos.CENTER);
-        card.setPadding(new Insets(22));
+        card.setPadding(new Insets(24));
         card.getStyleClass().add("overlay-card");
-        card.setMaxWidth(460);
+        card.setPrefWidth(380);
+        card.setMaxWidth(380);
+        card.setMinHeight(Region.USE_PREF_SIZE);
+        card.setMaxHeight(Region.USE_PREF_SIZE);
 
         cancelButton.setOnAction(e -> {
             root.getChildren().remove(card);
@@ -204,10 +278,6 @@ public class CategoryDetailsView {
 
     private String safeText(String text) {
         return text == null || text.isBlank() ? "Not provided" : text;
-    }
-
-    private String formatAmount(double amount) {
-        return String.format("$%.2f", amount);
     }
 
     public Scene getScene() {

@@ -33,12 +33,6 @@ public class DashboardView {
         double totalExpenses = financeService.getTotalExpenses(userId);
         double balance = totalIncome - totalExpenses;
 
-        double essentials = financeService.getCategoryTotal(userId, "Essentials");
-        double education = financeService.getCategoryTotal(userId, "Education & Work");
-        double savings = financeService.getCategoryTotal(userId, "Savings & Investments");
-        double lifestyle = financeService.getCategoryTotal(userId, "Lifestyle & Fun");
-        double health = financeService.getCategoryTotal(userId, "Health & Emergencies");
-
         BorderPane dashboardContent = new BorderPane();
         dashboardContent.getStyleClass().add("dashboard-root");
 
@@ -97,27 +91,7 @@ public class DashboardView {
         leftPanel.setPrefWidth(240);
         leftPanel.setAlignment(Pos.TOP_CENTER);
 
-        Label walletTitle = new Label("Your Wallet");
-        walletTitle.getStyleClass().add("wallet-main-title");
-
-        Label walletHint = new Label(generateWalletHint(totalIncome, totalExpenses));
-        walletHint.getStyleClass().add("wallet-main-subtitle");
-
-        VBox walletCards = new VBox(12,
-                createWalletCard("Essentials", "Rent, bills, groceries", formatAmount(essentials), "wallet-red"),
-                createWalletCard("Education & Work", "Tuition, books, tools", formatAmount(education), "wallet-yellow"),
-                createWalletCard("Savings & Investments", "Goals, reserve, future", formatAmount(savings), "wallet-green"),
-                createWalletCard("Lifestyle & Fun", "Shopping, outings, hobbies", formatAmount(lifestyle), "wallet-orange"),
-                createWalletCard("Health & Emergencies", "Medicine, doctor, urgent needs", formatAmount(health), "wallet-blue")
-        );
-
-        VBox walletContent = new VBox(10, walletTitle, walletHint, walletCards);
-        walletContent.setAlignment(Pos.CENTER_LEFT);
-
-        StackPane walletWrapper = new StackPane(walletContent);
-        walletWrapper.getStyleClass().add("wallet-wrapper");
-        walletWrapper.setPadding(new Insets(24));
-        walletWrapper.setMaxWidth(560);
+        VBox walletPanel = new WalletView().getRoot();
 
         VBox rightPanel = new VBox(14,
                 createSideCard("Financial Health", calculateHealthText(balance)),
@@ -127,7 +101,7 @@ public class DashboardView {
         rightPanel.setPrefWidth(260);
         rightPanel.setAlignment(Pos.TOP_CENTER);
 
-        HBox centerLayout = new HBox(24, leftPanel, walletWrapper, rightPanel);
+        HBox centerLayout = new HBox(24, leftPanel, walletPanel, rightPanel);
         centerLayout.setPadding(new Insets(8, 35, 10, 35));
         centerLayout.setAlignment(Pos.TOP_CENTER);
 
@@ -200,33 +174,6 @@ public class DashboardView {
         return box;
     }
 
-    private HBox createWalletCard(String title, String subtitle, String amount, String colorClass) {
-        Label titleLabel = new Label(title);
-        titleLabel.getStyleClass().add("wallet-card-title");
-
-        Label subtitleLabel = new Label(subtitle);
-        subtitleLabel.getStyleClass().add("wallet-card-subtitle");
-
-        VBox textBox = new VBox(4, titleLabel, subtitleLabel);
-
-        Label amountLabel = new Label(amount);
-        amountLabel.getStyleClass().add("wallet-card-amount");
-
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-
-        HBox card = new HBox(15, textBox, spacer, amountLabel);
-        card.setAlignment(Pos.CENTER_LEFT);
-        card.setPadding(new Insets(15, 18, 15, 18));
-        card.getStyleClass().addAll("wallet-card", colorClass);
-
-        card.setOnMouseClicked(e ->
-                SceneManager.switchTo(new CategoryDetailsView(title).getScene(), "CLO - " + title)
-        );
-
-        return card;
-    }
-
     private Button createBottomButton(String text) {
         Button button = new Button(text);
         button.getStyleClass().add("bottom-button");
@@ -254,7 +201,11 @@ public class DashboardView {
         card.setAlignment(Pos.CENTER);
         card.setPadding(new Insets(22));
         card.getStyleClass().add("overlay-card");
-        card.setMaxWidth(460);
+
+        card.setPrefWidth(380);
+        card.setMaxWidth(380);
+        card.setMinHeight(Region.USE_PREF_SIZE);
+        card.setMaxHeight(Region.USE_PREF_SIZE);
 
         cancelButton.setOnAction(e -> {
             card.setVisible(false);
@@ -279,13 +230,6 @@ public class DashboardView {
             return "Your wallet is ready for your first transaction.";
         }
         return "Your financial space is looking calm, clear, and in control.";
-    }
-
-    private String generateWalletHint(double income, double expenses) {
-        if (income == 0 && expenses == 0) {
-            return "No income added yet. Add your first transaction to get started.";
-        }
-        return "Choose a section to explore your spending categories.";
     }
 
     private String calculateHealthText(double balance) {
@@ -321,7 +265,6 @@ public class DashboardView {
     }
 
     public Scene getScene() {
-
         return scene;
     }
 }

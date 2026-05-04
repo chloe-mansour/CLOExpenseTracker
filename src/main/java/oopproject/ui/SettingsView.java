@@ -1,38 +1,39 @@
 package oopproject.ui;
 
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import oopproject.service.ExchangeRateService;
 import oopproject.service.SettingsService;
 import oopproject.util.SceneManager;
 import oopproject.util.ThemeManager;
 
-// Lets the user update app settings such as theme and currency rate
+// This page lets the user manage important app settings
 public class SettingsView {
 
     private final Scene scene;
     private final SettingsService settingsService = new SettingsService();
+    private final ExchangeRateService exchangeRateService = new ExchangeRateService();
 
     public SettingsView() {
         Label title = new Label("Settings");
         title.getStyleClass().add("section-title");
 
-        TextField lbpRateField = new TextField();
-        lbpRateField.setText(String.valueOf(settingsService.getUsdToLbpRate()));
-        VBox rateBox = createField("USD to LBP Rate", lbpRateField, "Example: 89500");
+        VBox rateCard = createRateCard();
 
+        // Only keep the dark mode setting because it actually affects the whole app
         CheckBox darkModeCheck = new CheckBox("Enable dark mode");
         darkModeCheck.setSelected(ThemeManager.isDarkMode());
         darkModeCheck.getStyleClass().add("settings-check");
 
-        CheckBox quotesPlaceholder = new CheckBox("Show motivational quotes");
-        quotesPlaceholder.setSelected(true);
-        quotesPlaceholder.getStyleClass().add("settings-check");
+        VBox preferencesBox = new VBox(16, darkModeCheck);
+        preferencesBox.setAlignment(Pos.CENTER_LEFT);
 
         Button saveButton = new Button("Save Settings");
         saveButton.getStyleClass().add("primary-button");
@@ -40,58 +41,38 @@ public class SettingsView {
         Button backButton = new Button("Back to Dashboard");
         backButton.getStyleClass().add("secondary-button");
 
+        HBox buttonsBox = new HBox(12, saveButton, backButton);
+        buttonsBox.setAlignment(Pos.CENTER_LEFT);
+
         Label messageLabel = new Label();
         messageLabel.getStyleClass().add("message-label");
         messageLabel.setMinHeight(24);
+        messageLabel.setWrapText(true);
 
+        VBox rightSide = new VBox(20, preferencesBox, buttonsBox, messageLabel);
+        rightSide.setAlignment(Pos.CENTER_LEFT);
+
+        HBox settingsCard = new HBox(32, rateCard, rightSide);
+        settingsCard.getStyleClass().add("info-card");
+        settingsCard.setPadding(new Insets(28));
+        settingsCard.setMaxWidth(780);
+        settingsCard.setAlignment(Pos.CENTER_LEFT);
+
+        // Save only the useful setting
         saveButton.setOnAction(e -> {
-            String rateText = lbpRateField.getText().trim();
+            boolean darkMode = darkModeCheck.isSelected();
 
-            if (rateText.isEmpty()) {
-                messageLabel.setText("Please enter a currency rate.");
-                return;
-            }
+            settingsService.setDarkModeEnabled(darkMode);
+            ThemeManager.setDarkMode(darkMode);
 
-            try {
-                double rate = Double.parseDouble(rateText);
-
-                if (rate <= 0) {
-                    messageLabel.setText("Rate must be greater than 0.");
-                    return;
-                }
-
-                boolean darkMode = darkModeCheck.isSelected();
-
-                settingsService.setUsdToLbpRate(rate);
-                settingsService.setDarkModeEnabled(darkMode);
-                ThemeManager.setDarkMode(darkMode);
-
-                SceneManager.switchTo(new SettingsView().getScene(), "CLO - Settings");
-
-            } catch (NumberFormatException ex) {
-                messageLabel.setText("Rate must be a valid number.");
-            }
+            SceneManager.switchTo(new SettingsView().getScene(), "CLO - Settings");
         });
 
         backButton.setOnAction(e ->
                 SceneManager.switchTo(new DashboardView().getScene(), "CLO - Dashboard")
         );
 
-        VBox settingsCard = new VBox(
-                14,
-                rateBox,
-                darkModeCheck,
-                quotesPlaceholder,
-                saveButton,
-                backButton,
-                messageLabel
-        );
-
-        settingsCard.getStyleClass().add("info-card");
-        settingsCard.setPadding(new Insets(24));
-        settingsCard.setMaxWidth(450);
-
-        VBox root = new VBox(20, title, settingsCard);
+        VBox root = new VBox(24, title, settingsCard);
         root.setAlignment(Pos.CENTER);
         root.setPadding(new Insets(40));
         root.getStyleClass().add("root-pane");
@@ -100,20 +81,49 @@ public class SettingsView {
         scene.getStylesheets().add(getClass().getResource(ThemeManager.getThemeStylesheet()).toExternalForm());
     }
 
-    // Creates a reusable settings input field
-    private VBox createField(String labelText, TextField field, String helperText) {
-        Label label = new Label(labelText);
-        label.getStyleClass().add("floating-label");
+    private VBox createRateCard() {
+        Label rateTitle = new Label("Daily USD to LBP Rate");
+        rateTitle.getStyleClass().add("card-title");
 
-        field.getStyleClass().add("floating-input");
+        Label rateValue = new Label(formatRate(settingsService.getUsdToLbpRate()));
+        rateValue.getStyleClass().add("settings-rate-value");
 
-        VBox fieldBox = new VBox(2, label, field);
-        fieldBox.getStyleClass().add("floating-field-box");
+        Label rateHelper = new Label("Updates automatically when internet is available.");
+        rateHelper.getStyleClass().add("helper-text");
+        rateHelper.setWrapText(true);
 
-        Label helper = new Label(helperText);
-        helper.getStyleClass().add("helper-text");
+        VBox rateCard = new VBox(10, rateTitle, rateValue, rateHelper);
+        rateCard.getStyleClass().add("settings-rate-card");
+        rateCard.setPadding(new Insets(22));
+        rateCard.setPrefWidth(320);
+        rateCard.setMaxWidth(320);
 
-        return new VBox(4, fieldBox, helper);
+        updateRateLabelInBackground(rateValue);
+
+        return rateCard;
+    }
+
+    private void updateRateLabelInBackground(Label rateValue) {
+        Thread thread = new Thread(() -> {
+            try {
+                double latestRate = exchangeRateService.fetchUsdToLbpRate();
+                settingsService.setUsdToLbpRate(latestRate);
+
+                Platform.runLater(() ->
+                        rateValue.setText(formatRate(latestRate))
+                );
+
+            } catch (Exception ignored) {
+                // If internet is unavailable, the app keeps the last saved rate
+            }
+        });
+
+        thread.setDaemon(true);
+        thread.start();
+    }
+
+    private String formatRate(double rate) {
+        return "1 USD = " + String.format("%,.0f", rate) + " LBP";
     }
 
     public Scene getScene() {

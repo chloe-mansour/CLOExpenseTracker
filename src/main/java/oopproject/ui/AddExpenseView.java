@@ -8,6 +8,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import oopproject.model.Expense;
 import oopproject.model.User;
@@ -25,6 +26,8 @@ public class AddExpenseView {
     private final FinanceService financeService = new FinanceService();
 
     public AddExpenseView() {
+        double inputWidth = 300;
+
         Label title = new Label("Add Expense");
         title.getStyleClass().add("section-title");
 
@@ -36,8 +39,10 @@ public class AddExpenseView {
                 "Lifestyle & Fun",
                 "Health & Emergencies"
         );
+
         categoryBox.setPromptText("Select Category");
-        categoryBox.setPrefWidth(300);
+        categoryBox.setPrefWidth(inputWidth);
+        categoryBox.setMaxWidth(inputWidth);
 
         TextField titleField = new TextField();
         TextField amountField = new TextField();
@@ -47,46 +52,40 @@ public class AddExpenseView {
         datePicker.setValue(LocalDate.now());
         datePicker.getStyleClass().add("floating-input");
 
-        VBox titleBox = createFloatingField("Title / Description", titleField, "Example: Rent, groceries, taxi");
-        VBox amountBox = createFloatingField("Amount", amountField, "Enter amount in USD");
-        VBox noteBox = createFloatingField("Note", noteField, "Optional");
-        VBox dateBox = createDateField("Date", datePicker, "Choose the transaction date");
-
-        Label categoryLabel = new Label("Expense Category");
-        categoryLabel.getStyleClass().add("floating-label");
-
-        VBox categoryFieldBox = new VBox(2, categoryLabel, categoryBox);
-        categoryFieldBox.getStyleClass().add("floating-field-box");
-
-        Label categoryHelper = new Label("Choose where this expense belongs");
-        categoryHelper.getStyleClass().add("helper-text");
-
-        VBox categoryBoxWrapper = new VBox(4, categoryFieldBox, categoryHelper);
+        VBox categoryBoxWrapper = createCategoryField(categoryBox, inputWidth);
+        VBox titleBox = createFloatingField("Title / Description", titleField, "Example: Rent, groceries, taxi", inputWidth);
+        VBox amountBox = createFloatingField("Amount", amountField, "Enter amount in USD", inputWidth);
+        VBox dateBox = createDateField("Date", datePicker, "Choose the transaction date", inputWidth);
+        VBox noteBox = createFloatingField("Note", noteField, "Optional", inputWidth);
 
         Label messageLabel = new Label();
         messageLabel.getStyleClass().add("message-label");
+        messageLabel.setWrapText(true);
+        messageLabel.setMaxWidth(360);
+        messageLabel.setAlignment(Pos.CENTER);
 
-        // Restricts amount input to numbers with up to 2 decimals
+        // Allows only numbers with up to two decimal places
         amountField.textProperty().addListener((obs, oldVal, newVal) -> {
             if (!newVal.matches("\\d*(\\.\\d{0,2})?")) {
                 amountField.setText(oldVal);
             }
-            amountField.getParent().getStyleClass().remove("input-error");
+
+            // Clears warning text while the user edits
             messageLabel.setText("");
         });
 
         Button saveButton = new Button("Save Expense");
         saveButton.getStyleClass().add("primary-button");
 
-        // Keyboard navigation between expense fields
+        Button backButton = new Button("Back to Dashboard");
+        backButton.getStyleClass().add("secondary-button");
+
+        // Keyboard navigation makes the form easier to use
         categoryBox.setOnAction(e -> titleField.requestFocus());
         titleField.setOnAction(e -> amountField.requestFocus());
         amountField.setOnAction(e -> datePicker.requestFocus());
         datePicker.setOnAction(e -> noteField.requestFocus());
         noteField.setOnAction(e -> saveButton.fire());
-
-        Button backButton = new Button("Back to Dashboard");
-        backButton.getStyleClass().add("secondary-button");
 
         saveButton.setOnAction(e -> {
             User currentUser = SessionManager.getCurrentUser();
@@ -102,12 +101,9 @@ public class AddExpenseView {
             String note = noteField.getText().trim();
             LocalDate date = datePicker.getValue();
 
+            // Required field validation
             if (category == null || transactionTitle.isEmpty() || amountText.isEmpty()) {
                 messageLabel.setText("Please fill in the required fields.");
-
-                if (amountText.isEmpty()) {
-                    amountField.getParent().getStyleClass().add("input-error");
-                }
                 return;
             }
 
@@ -116,7 +112,6 @@ public class AddExpenseView {
 
                 if (amount <= 0) {
                     messageLabel.setText("Amount must be greater than 0.");
-                    amountField.getParent().getStyleClass().add("input-error");
                     return;
                 }
 
@@ -135,7 +130,6 @@ public class AddExpenseView {
 
             } catch (NumberFormatException ex) {
                 messageLabel.setText("Amount must be a valid number.");
-                amountField.getParent().getStyleClass().add("input-error");
             }
         });
 
@@ -143,7 +137,8 @@ public class AddExpenseView {
                 SceneManager.switchTo(new DashboardView().getScene(), "CLO - Dashboard")
         );
 
-        VBox root = new VBox(
+        // Main form layout, same style as SignupView
+        VBox form = new VBox(
                 16,
                 title,
                 categoryBoxWrapper,
@@ -156,6 +151,12 @@ public class AddExpenseView {
                 messageLabel
         );
 
+        // Keeps the form centered without stretching buttons
+        form.setAlignment(Pos.CENTER);
+        form.setMaxWidth(420);
+
+        // StackPane centers the form on the page
+        StackPane root = new StackPane(form);
         root.setAlignment(Pos.CENTER);
         root.setPadding(new Insets(40));
         root.getStyleClass().add("root-pane");
@@ -164,32 +165,99 @@ public class AddExpenseView {
         scene.getStylesheets().add(getClass().getResource(ThemeManager.getThemeStylesheet()).toExternalForm());
     }
 
-    private VBox createFloatingField(String labelText, TextField field, String helperText) {
+    // Creates the category selector block
+    private VBox createCategoryField(ComboBox<String> categoryBox, double width) {
+        Label categoryLabel = new Label("Expense Category");
+        categoryLabel.getStyleClass().add("floating-label");
+
+        VBox categoryFieldBox = new VBox(2, categoryLabel, categoryBox);
+        categoryFieldBox.getStyleClass().add("floating-field-box");
+        categoryFieldBox.setAlignment(Pos.CENTER_LEFT);
+        categoryFieldBox.setMinWidth(width);
+        categoryFieldBox.setPrefWidth(width);
+        categoryFieldBox.setMaxWidth(width);
+
+        Label categoryHelper = new Label("Choose where this expense belongs");
+        categoryHelper.getStyleClass().add("helper-text");
+        categoryHelper.setAlignment(Pos.CENTER_LEFT);
+        categoryHelper.setMinWidth(width);
+        categoryHelper.setPrefWidth(width);
+        categoryHelper.setMaxWidth(width);
+
+        // Container is centered like SignupView fields
+        VBox container = new VBox(4, categoryFieldBox, categoryHelper);
+        container.setAlignment(Pos.CENTER);
+        container.setMinWidth(width);
+        container.setPrefWidth(width);
+        container.setMaxWidth(width);
+
+        return container;
+    }
+
+    // Creates a normal text input block
+    private VBox createFloatingField(String labelText, TextField field, String helperText, double width) {
         Label label = new Label(labelText);
         label.getStyleClass().add("floating-label");
 
         field.getStyleClass().add("floating-input");
+        field.setMinWidth(width);
+        field.setPrefWidth(width);
+        field.setMaxWidth(width);
 
         VBox fieldBox = new VBox(2, label, field);
         fieldBox.getStyleClass().add("floating-field-box");
+        fieldBox.setAlignment(Pos.CENTER_LEFT);
+        fieldBox.setMinWidth(width);
+        fieldBox.setPrefWidth(width);
+        fieldBox.setMaxWidth(width);
 
         Label helper = new Label(helperText);
         helper.getStyleClass().add("helper-text");
+        helper.setAlignment(Pos.CENTER_LEFT);
+        helper.setMinWidth(width);
+        helper.setPrefWidth(width);
+        helper.setMaxWidth(width);
 
-        return new VBox(4, fieldBox, helper);
+        // Container keeps helper text aligned under the box
+        VBox container = new VBox(4, fieldBox, helper);
+        container.setAlignment(Pos.CENTER);
+        container.setMinWidth(width);
+        container.setPrefWidth(width);
+        container.setMaxWidth(width);
+
+        return container;
     }
 
-    private VBox createDateField(String labelText, DatePicker picker, String helperText) {
+    // Creates the date picker input block
+    private VBox createDateField(String labelText, DatePicker picker, String helperText, double width) {
         Label label = new Label(labelText);
         label.getStyleClass().add("floating-label");
 
+        picker.setMinWidth(width);
+        picker.setPrefWidth(width);
+        picker.setMaxWidth(width);
+
         VBox fieldBox = new VBox(2, label, picker);
         fieldBox.getStyleClass().add("floating-field-box");
+        fieldBox.setAlignment(Pos.CENTER_LEFT);
+        fieldBox.setMinWidth(width);
+        fieldBox.setPrefWidth(width);
+        fieldBox.setMaxWidth(width);
 
         Label helper = new Label(helperText);
         helper.getStyleClass().add("helper-text");
+        helper.setAlignment(Pos.CENTER_LEFT);
+        helper.setMinWidth(width);
+        helper.setPrefWidth(width);
+        helper.setMaxWidth(width);
 
-        return new VBox(4, fieldBox, helper);
+        VBox container = new VBox(4, fieldBox, helper);
+        container.setAlignment(Pos.CENTER);
+        container.setMinWidth(width);
+        container.setPrefWidth(width);
+        container.setMaxWidth(width);
+
+        return container;
     }
 
     public Scene getScene() {
